@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>随机猫咪头像生成器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+    <h1>随机猫咪头像生成器</h1>
+    <p class="sub">输入任意 seed，同一内容永远生成同一只猫（SHA-256 驱动）</p>
+
+    <div class="input-row">
+      <label for="seed-input">Seed</label>
+      <input id="seed-input" type="text" placeholder="输入任意内容，如：我的猫叫年糕" autocomplete="off" spellcheck="false">
+      <button id="btn-random" type="button" aria-label="随机生成一个 seed">🎲 随机</button>
+    </div>
+
+    <div id="avatar-box" class="avatar-box" role="img" aria-label="生成的猫咪头像"></div>
+
+    <div class="btn-row">
+      <button id="btn-download" type="button">下载 SVG</button>
+      <button id="btn-copy" type="button">复制链接</button>
+    </div>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+    <p class="hint">链接形如 <code>?seed=xxx</code>，把链接发给别人就能看到同一只猫；跑 <code>node server.js</code> 后还能 <code>&lt;img src="/avatar.svg?seed=xxx"&gt;</code> 直接引用</p>
+  </main>
+
+  <script src="parts.js"></script>
+  <script src="breeds.js"></script>
+  <script src="avatar.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>
