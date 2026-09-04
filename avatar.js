@@ -7,12 +7,13 @@ window.renderAvatar = (function () {
     const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
     return new Uint8Array(buf);
   }
-  function mulberry32(a) { // 确定性 PRNG
+  function splitmix64(seed) { // 确定性 PRNG：64 位状态、周期 2^64（BigInt；输出高 53 位 / 2^53 ∈ [0,1)）
     return function () {
-      a |= 0; a = a + 0x6D2B79F5 | 0;
-      let t = Math.imul(a ^ a >>> 15, 1 | a);
-      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
-      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      seed = (seed + 0x9E3779B97F4A7C15n) & 0xFFFFFFFFFFFFFFFFn;
+      let z = seed;
+      z = ((z ^ (z >> 30n)) * 0xBF58476D1CE4E5B9n) & 0xFFFFFFFFFFFFFFFFn;
+      z = ((z ^ (z >> 27n)) * 0x94D049BB133111EBn) & 0xFFFFFFFFFFFFFFFFn;
+      return Number((z ^ (z >> 31n)) >> 11n) / 9007199254740992;
     };
   }
   const makeRng = f => ({
@@ -39,8 +40,8 @@ window.renderAvatar = (function () {
   // ---------- 生成 ----------
   return async function renderAvatar(seed) {
     const hash = await sha256(String(seed));
-    const seed32 = (hash[0] | hash[1] << 8 | hash[2] << 16 | hash[3] << 24) >>> 0;
-    const rng = makeRng(mulberry32(seed32));
+    const seed64 = hash.slice(0, 8).reduce((a, b) => a << 8n | BigInt(b), 0n); // 前 8 字节 → 64 位主种子
+    const rng = makeRng(splitmix64(seed64));
     const { STROKE, FURS, IRIS, BG, BG_PATTERNS, FACES, BODIES, TAIL_TX, TAILS, TAIL_DECO, tailPoints,
             EARS, EAR_FURS, EYES, MOUTHS, WHISKERS, HEAD_MARKS, BODY_MARKS, TAIL_MARKS,
             BLUSHES, BROWS, TSHIRT_ART, TEE_COLORS, HOODIE, OUTFITS, ACCESSORIES, ITEMS, MOODS } = window.PARTS;
@@ -115,9 +116,9 @@ window.renderAvatar = (function () {
               eye: eyeI, iris: IRIS[irisI], iris2: IRIS[iris2I], whisker, headMark, bodyMark, tailMark, blush, mc: null, mc2: null };
     }
     // 颜色微调机制：耳/头/身/尾的每个**不同**毛色独立 ±0~2.5% 明度（同色部件一起变，头身尾保持同色；
-    // 用 SHA-256 第 2 个 4 字节做副 PRNG，完全不消耗主随机序列）
-    const jseed = (hash[4] | hash[5] << 8 | hash[6] << 16 | hash[7] << 24) >>> 0;
-    const jrng = makeRng(mulberry32(jseed));
+    // 用 SHA-256 第 2 个 8 字节（第 9-16 字节）做副 PRNG，完全不消耗主随机序列）
+    const jseed = hash.slice(8, 16).reduce((a, b) => a << 8n | BigInt(b), 0n);
+    const jrng = makeRng(splitmix64(jseed));
     const jitCache = new Map(); // 同一基色 → 同一微调结果（耳朵与身体同色时保持一致）
     const jit = c => { if (!jitCache.has(c)) jitCache.set(c, shiftL(c, (jrng.f() * 0.025) * (jrng.f() < 0.5 ? -1 : 1))); return jitCache.get(c); };
     cat.fur = jit(cat.fur); cat.earL = jit(cat.earL); cat.earR = jit(cat.earR);
