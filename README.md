@@ -80,7 +80,7 @@ https://你的项目.vercel.app/avatar.svg?seed=年糕
 ├── avatar.js        # 纯生成模块：seed → SVG 字符串（零 UI 依赖，可被任何页面复用）
 ├── parts.js         # 部件数据（20 类，逻辑与数据分离）
 ├── breeds.js        # 品种猫整体设计（12 种定妆图纸）
-├── main.js          # UI 交互
+├── ui.js             # UI 交互（不能叫 main.js——Vercel 会误认成部署入口）
 ├── serve.js          # 零依赖 Node 服务器（本地开发：静态托管 + /avatar.svg）
 ├── api/avatar.svg.js # Vercel Serverless Function（线上 /avatar.svg）
 ├── vercel.json       # Vercel 路由重写：/avatar.svg → /api/avatar.svg

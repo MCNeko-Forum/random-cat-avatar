@@ -1,4 +1,5 @@
-// main.js —— UI 交互：读输入/URL → 调 avatar.js → 渲染、下载、复制链接、自检
+// ui.js —— UI 交互：读输入/URL → 调 avatar.js → 渲染、下载、复制链接、自检
+// 注意：不能叫 main.js/server.js —— Vercel 零配置会把根目录这类名字的文件当整个部署的 Node 入口，导致 500
 (function () {
   const $ = id => document.getElementById(id);
   const input = $('seed-input'), box = $('avatar-box'), statusEl = $('status');

@@ -66,7 +66,7 @@ random-cat-avatar/
 ├── avatar.js        # 纯生成模块：输入 seed → 输出 SVG 字符串，零 UI、零 DOM 依赖，可被任何页面 import
 ├── parts.js         # 部件数据：20 类部件（大部分每类 ≥10 个候选，头部花纹 5 个、胡须 2 色）
 ├── breeds.js        # 品种猫整体设计（1% 彩蛋，12 种常见品种等概率，各含定妆图纸）
-├── main.js          # UI 交互：读输入/URL → 调 avatar.js → 渲染、下载、复制链接
+├── ui.js             # UI 交互：读输入/URL → 调 avatar.js → 渲染、下载、复制链接（**不能叫 main.js**——Vercel 零配置会把根目录 main.js/server.js 当整个部署的 Node 入口导致 500）
 ├── server.js        # 零依赖 Node 服务器：静态托管 + /avatar.svg?seed=xxx 动态端点（vm 复用 parts/breeds/avatar 三文件，逻辑与浏览器端 100% 一致）→ `<img>` 标签可直接引用
 └── REQUIREMENTS.md  # 本文档
 ```
