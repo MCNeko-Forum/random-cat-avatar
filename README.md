@@ -47,6 +47,24 @@ node server.js          # 默认端口 8123，PORT 环境变量可改
 
 端点特性：同 seed 同图可缓存（`Cache-Control: 24h`）、`Access-Control-Allow-Origin: *` 允许跨站引用、seed 经 SHA-256 无注入面、目录穿越已防护。
 
+### 方式四：部署到 Vercel
+
+本项目已包含 Vercel Serverless Function 配置。把仓库导入 Vercel 后无需构建命令：
+
+1. 登录 [Vercel](https://vercel.com/)，点击 **Add New → Project**。
+2. 导入 `MCNeko-Forum/random-cat-avatar` 仓库。
+3. Framework Preset 选择 **Other**，Build Command 留空，Output Directory 留空。
+4. 点击 **Deploy**。
+
+部署后可使用：
+
+```text
+https://你的项目.vercel.app/
+https://你的项目.vercel.app/avatar.svg?seed=年糕
+```
+
+`/avatar.svg` 会由 `api/avatar.svg.js` 生成，`vercel.json` 负责把公开路径重写到 Serverless Function。
+
 ## 用法
 
 - **seed 输入**：页面输入任意字符串（中文、emoji 都行），实时生成
