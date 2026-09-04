@@ -36,6 +36,27 @@ window.renderAvatar = (function () {
     const hx = v => Math.round(v * 255).toString(16).padStart(2, '0');
     return '#' + hx(cv(h + 1 / 3)) + hx(cv(h)) + hx(cv(h - 1 / 3));
   }
+  // 身体路径在高度 y 处的半宽（相对中心 x256）：折线化（Q 采样 8 段）后取水平线交点到中心的最大距离
+  function bodyHalfWidth(d, y) {
+    const pts = [];
+    let cur = null;
+    for (const c of d.match(/[MLQZ][^MLQZ]*/g) || []) {
+      const n = (c.match(/-?\d+(?:\.\d+)?/g) || []).map(Number), t = c[0];
+      if (t === 'M' || t === 'L') { cur = [n[0], n[1]]; pts.push(cur); }
+      else if (t === 'Q') {
+        const p = cur, cx = n[0], cy = n[1];
+        for (let i = 1; i <= 8; i++) { const u = 1 - i / 8, v = i / 8;
+          cur = [u * u * p[0] + 2 * u * v * cx + v * v * n[2], u * u * p[1] + 2 * u * v * cy + v * v * n[3]];
+          pts.push(cur); }
+      }
+    }
+    let hw = 0;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const [x1, y1] = pts[i], [x2, y2] = pts[i + 1];
+      if ((y1 - y) * (y2 - y) <= 0 && y1 !== y2) hw = Math.max(hw, Math.abs(x1 + (x2 - x1) * (y - y1) / (y2 - y1) - 256));
+    }
+    return hw;
+  }
 
   // ---------- 生成 ----------
   return async function renderAvatar(seed) {
@@ -141,7 +162,7 @@ window.renderAvatar = (function () {
     const faceD = FACES[cat.face], bodyD = BODIES[cat.body], tailD = TAILS[cat.tail];
     // 头顶 y（帽子类配饰跟随）：M y 后接 a rx,ry → My-ry（圆/椭圆顶）；接 h → My（方脸顶边）
     const fm = faceD.match(/^M[\d.]+,([\d.]+)\s+(?:h[\d.]+|a([\d.]+),([\d.]+))/);
-    const fcy = +fm[1], frx = fm[2] ? +fm[2] : 108, fry = fm[2] ? +fm[3] : 126; // 脸椭圆参数（方脸用等效椭圆：中心(256,225) r108/126）
+    const fcy = fm[2] ? +fm[1] : 225, frx = fm[2] ? +fm[2] : 108, fry = fm[2] ? +fm[3] : 126; // 脸椭圆参数；方脸（唯一 h 开头）M 点 y=98 是顶边不是中心，须用等效椭圆中心 225（225±126 ≈ 实际 y99-351），否则 faceTop/faceBottom 全偏 127px——帽子飞天、围巾围兜画进脸里
     const faceTop = fcy - fry, faceBottom = fcy + fry; // 脸底（脖子件跟随）
     const earShapeL = EARS[cat.earLS], earShapeR = EARS[cat.earRS];
     const ef = EAR_FURS[cat.earFi ?? cat.earFur]; // 普通猫 earFi / 品种图纸 earFur
@@ -166,7 +187,13 @@ window.renderAvatar = (function () {
     }
     layers.push(`<path d="${bodyD}" fill="none" stroke="${STROKE}" stroke-width="6" mask="url(#m-body-line)"/>`); // 身体描边（m-body-line：填充+12 描边带全白+脸黑挖下巴遮挡区，黑边完整 6px）——画在服装后出轮廓、在脖子件/兜帽之下，围巾垂布/围兜/帽沿不再被黑线切
     if (outfit !== false && OUTFITS[outfit].neck) {                                      // 脖子件：画在身体描边之上（垂布/围兜盖住身体边缘黑线）、脸填充之前（顶部被脸盖住，不挡头）；fn 可接收 faceBottom（围巾按身体实际高度取垂布长度）
-      layers.push(`<g transform="translate(0,${faceBottom - 353})">${OUTFITS[outfit].fn(faceBottom)}</g>`);
+      const dy = faceBottom - 353;
+      let tf = '';
+      if (OUTFITS[outfit].bib) { // 围兜：半宽 72+描边 3=75 超过所在高度身体半宽时，绕顶边中心 (256,347) 等比缩小（仅瘦身体触发，宽身体原样不动）
+        const hw = bodyHalfWidth(bodyD, 466 + dy);                                       // 围兜最宽处（local y466 平移后）的身体半宽
+        if (hw < 75) tf = ` translate(256,347) scale(${(hw / 75).toFixed(3)}) translate(-256,-347)`;
+      }
+      layers.push(`<g transform="translate(0,${dy})${tf}">${OUTFITS[outfit].fn(faceBottom)}</g>`);
     }
     const earSvg = (shape, color, clipId) =>                                            // 耳朵（先耳后脸，脸压耳根）
       `<path d="${shape.d}" fill="${color}" stroke="${STROKE}" stroke-width="6" stroke-linejoin="round"/>` +
@@ -194,8 +221,8 @@ window.renderAvatar = (function () {
       const a = ACCESSORIES[acc];
       layers.push(a.ride ? `<g transform="translate(0,${faceTop - 97})">${a.fn()}</g>` : a.fn());
     }
-    if (itemL !== false) layers.push(ITEMS[itemL](58, 440));                           // 左物品
-    if (itemR !== false) layers.push(`<g transform="translate(512,0) scale(-1,1)">${ITEMS[itemR](58, 440)}</g>`); // 右物品（镜像）
+    if (itemL !== false) layers.push(`<g transform="translate(58,440) scale(1.3) rotate(-15)">${ITEMS[itemL](0, 0)}</g>`); // 左物品：放大 1.3×、向左倾 15°（绕物品中心）
+    if (itemR !== false) layers.push(`<g transform="translate(512,0) scale(-1,1) translate(58,440) scale(1.3) rotate(-15)">${ITEMS[itemR](0, 0)}</g>`); // 右物品：镜像后同款变换 → 视觉上放大 1.3×、向右倾 15°
     if (mood !== false) layers.push(MOODS[mood]());                                    // 心情符号（左上角，最上层）
 
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="随机猫咪头像${cat.name ? '（' + cat.name + '）' : ''}">
