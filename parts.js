@@ -108,7 +108,7 @@ window.PARTS = (() => {
     { c: null,      fn: () => '' },                                                          // 无色差内耳
     { c: '#f2b8c6', fn: (ax, ay) => `<circle cx="${ax - 7}" cy="${ay - 32}" r="4" fill="#d98ea6"/><circle cx="${ax + 5}" cy="${ay - 24}" r="4" fill="#d98ea6"/><circle cx="${ax - 3}" cy="${ay - 14}" r="4" fill="#d98ea6"/>` } ]; // 点状内耳
 
-  // ---------- 眼睛 ×10（fn(iL,iR) 画双眼，iL/iR=纯色铺满整眼；眼位 (206,175)/(306,175)；线条变体无颜色） ----------
+  // ---------- 眼睛 ×15（fn(iL,iR) 画双眼，iL/iR=纯色铺满整眼；眼位 (206,175)/(306,175)；线条变体无颜色） ----------
   const LX = 206, RX = 306, EY = 195;
   const EYES = [
     (iL, iR) => [LX, RX].map((cx, i) => `<circle cx="${cx}" cy="${EY}" r="27" fill="${i ? iR : iL}" stroke="${STROKE}" stroke-width="5"/>`).join(''), // 标准圆眼
@@ -124,7 +124,8 @@ window.PARTS = (() => {
     (iL, iR) => [LX, RX].map((cx, i) => `<path d="M${cx - 26},${EY} a26,26 0 0 1 52,0 Z" fill="${i ? iR : iL}" stroke="${STROKE}" stroke-width="5" stroke-linejoin="round"/>`).join(''), // 上半圆眼
     (iL, iR) => [LX, RX].map((cx, i) => `<path d="M${cx - 26},${EY} a26,26 0 0 0 52,0 Z" fill="${i ? iR : iL}" stroke="${STROKE}" stroke-width="5" stroke-linejoin="round"/>`).join(''), // 下半圆眼
     (iL, iR) => [LX, RX].map((cx, i) => `<path d="M${cx - 26},${EY} a26,26 0 0 0 52,0 Z" fill="${i ? iR : iL}" stroke="${STROKE}" stroke-width="5" stroke-linejoin="round" transform="rotate(${i ? 30 : -30} ${cx} ${EY})"/>`).join(''), // 委屈眼（下半圆 75%，外角下垂）
-    (iL, iR) => [LX, RX].map((cx, i) => `<path d="M${cx - 26},${EY} a26,26 0 0 0 52,0 Z" fill="${i ? iR : iL}" stroke="${STROKE}" stroke-width="5" stroke-linejoin="round" transform="rotate(${i ? -30 : 30} ${cx} ${EY})"/>`).join('') ]; // 愤怒眼（下半圆 75%，内角下压）
+    (iL, iR) => [LX, RX].map((cx, i) => `<path d="M${cx - 26},${EY} a26,26 0 0 0 52,0 Z" fill="${i ? iR : iL}" stroke="${STROKE}" stroke-width="5" stroke-linejoin="round" transform="rotate(${i ? -30 : 30} ${cx} ${EY})"/>`).join(''), // 愤怒眼（下半圆 75%，内角下压）
+    () => [LX, RX].map(cx => `<circle cx="${cx}" cy="${EY}" r="11" fill="${STROKE}"/>`).join('') ]; // 豆豆眼（两颗纯黑小圆点，无虹膜色）
 
   // ---------- 嘴巴 ×6（中心 (256,276)） ----------
   const MOUTHS = [
