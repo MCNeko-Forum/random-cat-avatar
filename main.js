@@ -59,6 +59,31 @@
     setStatus('已下载 SVG');
   });
 
+  // SVG 字符串 → Image → canvas → PNG（1024 高清，纯矢量无外链，canvas 不会被污染）
+  $('btn-download-png').addEventListener('click', async () => {
+    if (!currentSvg) return;
+    try {
+      const size = 1024;
+      const url = URL.createObjectURL(new Blob([currentSvg], { type: 'image/svg+xml' }));
+      const img = new Image();
+      await new Promise((res, rej) => { img.onload = res; img.onerror = () => rej(new Error('SVG 解码失败')); img.src = url; });
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      c.getContext('2d').drawImage(img, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(b);
+        a.download = `cat-${input.value || 'avatar'}.png`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        setStatus('已下载 PNG (1024×1024)');
+      }, 'image/png');
+    } catch (e) {
+      setStatus('PNG 导出失败：' + e.message, true);
+    }
+  });
+
   $('btn-copy').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText(location.href);
