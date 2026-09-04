@@ -1,12 +1,16 @@
+// Vercel Serverless Function：GET /avatar.svg?seed=xxx → 动态出图
+// 与 serve.js 共用 parts/breeds/avatar 三文件，逻辑与浏览器端 100% 一致。
+// 注意：文件路径必须用字面量写死（不能用循环+变量拼接），
+// 否则 Vercel 打包时 trace 不到文件，运行时 500。
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
 const ctx = { window: {}, crypto: require('crypto').webcrypto, TextEncoder };
 vm.createContext(ctx);
-for (const file of ['parts.js', 'breeds.js', 'avatar.js']) {
-  vm.runInContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), ctx);
-}
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'parts.js'), 'utf8'), ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'breeds.js'), 'utf8'), ctx);
+vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'avatar.js'), 'utf8'), ctx);
 
 module.exports = async (req, res) => {
   try {

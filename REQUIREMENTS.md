@@ -71,7 +71,7 @@ random-cat-avatar/
 └── REQUIREMENTS.md  # 本文档
 ```
 
-> **`<img>` 引用**：`node server.js`（默认 8000 端口，`PORT` 环境变量可改）后，`<img src="/avatar.svg?seed=任意内容">` 直接出图；同 seed 同图可缓存（Cache-Control 24h）、`Access-Control-Allow-Origin: *` 允许跨站引用、seed 经 SHA-256 无注入面、目录穿越已防护。
+> **`<img>` 引用**：`node serve.js`（默认端口 8123，`PORT` 环境变量可改）后，`<img src="/avatar.svg?seed=任意内容">` 直接出图；同 seed 同图可缓存（Cache-Control 24h）、`Access-Control-Allow-Origin: *` 允许跨站引用、seed 经 SHA-256 无注入面、目录穿越已防护。Vercel 部署同端点。
 > **测试站部署（宝塔 nginx）**：站点 root=D:/repos/random-cat-avatar 纯静态，`/avatar.svg` 由反代提供——代理配置在 `D:/BtSoft/nginx/conf/proxy/randomcatavatar.test/avatar.conf`（location = /avatar.svg → 127.0.0.1:8123；8000 被本机 Python 占用，故 node 用 `PORT=8123` 启动）。改代理配置后需重载 nginx（服务为 SYSTEM 权限，普通终端 reload 会 Access denied，需宝塔面板或管理员终端执行）。
 
 > **模块接口约定**：`avatar.js` 对外只暴露一个函数 `renderAvatar(seed) → Promise<string>`（返回完整 SVG 字符串，内部完成 SHA-256 → PRNG → 部件抽取 → 拼装全流程）。它不碰 DOM、不碰 location，理论上任何项目 `import` 走就能用，也可以直接拿返回值当静态资源。

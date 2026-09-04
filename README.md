@@ -81,7 +81,9 @@ https://你的项目.vercel.app/avatar.svg?seed=年糕
 ├── parts.js         # 部件数据（20 类，逻辑与数据分离）
 ├── breeds.js        # 品种猫整体设计（12 种定妆图纸）
 ├── main.js          # UI 交互
-├── server.js        # 零依赖 Node 服务器（静态托管 + /avatar.svg）
+├── serve.js          # 零依赖 Node 服务器（本地开发：静态托管 + /avatar.svg）
+├── api/avatar.svg.js # Vercel Serverless Function（线上 /avatar.svg）
+├── vercel.json       # Vercel 路由重写：/avatar.svg → /api/avatar.svg
 └── REQUIREMENTS.md  # 需求文档（部件细节的完整说明）
 ```
 

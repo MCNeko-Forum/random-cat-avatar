@@ -1,5 +1,7 @@
-// server.js —— 零依赖 Node 服务器：静态托管 + /avatar.svg?seed=xxx 动态出图
-// 用法：node server.js（端口默认 8123，可用环境变量 PORT 覆盖）
+// serve.js —— 零依赖 Node 服务器：静态托管 + /avatar.svg?seed=xxx 动态出图
+// 用法：node serve.js（端口默认 8123，可用环境变量 PORT 覆盖）
+// 注意：不能叫 server.js —— Vercel 会把根目录 server.js 当成整个部署的入口导致 500
+// （Vercel 上由 api/avatar.svg.js + vercel.json 提供同一端点，本地开发才用本文件）
 // 之后任何页面都能直接引用：<img src="http://localhost:8123/avatar.svg?seed=任意内容">
 const http = require('http'), fs = require('fs'), path = require('path'), vm = require('vm');
 
