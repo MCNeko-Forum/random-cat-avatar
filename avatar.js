@@ -94,13 +94,15 @@ window.renderAvatar = (function () {
     };
 
     if (breedPool) {
-      // ===== 品种猫：五官由图纸固定；仅嘴/眉/服装/配饰/物品照常随机 =====
+      // ===== 品种猫：配色由图纸固定；嘴/眉/胡须数量/尾巴动作/眼样式（不变色）/服装/配饰/物品/心情照常随机 =====
       mouth = rng.int(MOUTHS.length);
       brow = rng.chance(0.7) ? { c: rng.chance(0.5) ? '#3b3b46' : '#8d8d99', i: rng.int(BROWS.length) } : null;
       // 图纸的花纹/腮红是数字索引 → 规范化为对象（颜色留空，渲染时回退 mc/mc2）
       const mk = v => v == null ? null : { i: v };
       cat = { ...breedPool, earLS: 0, earRS: 0, iris2: breedPool.iris,   // 耳形已固定为三角形，图纸 ear 字段废弃
-              whisker: { c: breedPool.whisker.color, n: breedPool.whisker.n }, // 图纸字段 color → 渲染层 c
+              tail: rng.int(TAILS.length),                              // 尾巴动作：随机（图纸 tail 字段废弃；尾纹仍由 tailMark 固定沿尾生成）
+              eye: rng.int(EYES.length),                                // 眼样式：随机（图纸 eye 字段废弃；虹膜色 iris/iris2 保持图纸色）
+              whisker: { c: breedPool.whisker.color, n: 3 + rng.int(3) }, // 胡须：颜色图纸固定，数量随机 3~5 根（图纸 n 字段废弃）
               headMark: mk(breedPool.headMark), bodyMark: mk(breedPool.bodyMark),
               tailMark: mk(breedPool.tailMark), blush: mk(breedPool.blush) };
     } else {
