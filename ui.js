@@ -87,8 +87,8 @@
 
   $('btn-copy').addEventListener('click', async () => {
     try {
-      await navigator.clipboard.writeText(location.href);
-      setStatus('链接已复制');
+      await navigator.clipboard.writeText(new URL('/avatar.svg?seed=' + encodeURIComponent(input.value), location.origin).href);
+      setStatus('图片链接已复制');
     } catch {
       setStatus('复制失败，请手动复制地址栏链接', true);
     }
