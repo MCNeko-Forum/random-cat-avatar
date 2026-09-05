@@ -68,8 +68,8 @@ window.renderAvatar = (function () {
             BLUSHES, BROWS, TSHIRT_ART, TEE_COLORS, HOODIE, OUTFITS, ACCESSORIES, ITEMS, MOODS } = window.PARTS;
 
     // ===== PRNG 消费顺序（新增部件的随机数只能追加在末尾，见 REQUIREMENTS.md §4.2）=====
-    // 1. 品种判定：99.9% 普通猫 / 0.1% 品种猫（12 种等概率）
-    const breedPool = rng.chance(0.001) ? window.BREEDS[rng.int(window.BREEDS.length)] : null;
+    // 1. 品种判定：99.998% 普通猫 / 0.002% 品种猫（12 种等概率）
+    const breedPool = rng.chance(0.00002) ? window.BREEDS[rng.int(window.BREEDS.length)] : null;
 
     // 2-3. 背景色 + 背景图案（两种猫都随机）
     const bg = BG[rng.int(BG.length)];
