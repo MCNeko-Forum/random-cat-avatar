@@ -8,12 +8,12 @@
 
 - **确定性生成**：seed → SHA-256 → splitmix64 PRNG（64 位种子）→ 头像，跨端一致
 - **20 类部件、100+ 候选样式**：毛色 14 种、尾巴/身体/脸型/眼睛各 10+ 种、花纹/腮红/眉毛、服装 12 款（T 恤/连帽卫衣/衬衫/围巾/领结…）、配饰 10 款、左右物品 10 款
-- **稀有品种猫彩蛋**：0.1% 概率命中 12 种定妆品种猫（英短/美短/狸花/橘猫/三花/暹罗…）
+- **稀有品种猫彩蛋**：0.002% 概率命中 12 种定妆品种猫（英短/美短/狸花/橘猫/三花/暹罗…）
 - **左上角心情符号**：9 种（爱心/星星/音符/问号/感叹号/怒符…）60% 概率出现
 - **30% 概率异瞳**、每个毛色独立 ±0~2.5% 明度微调
 - **一键下载**：SVG 矢量 / 1024×1024 PNG 位图
 - **URL 分享**：`?seed=xxx` 链接发给别人即可看到同一只猫
-- **`<img>` 直引**：跑起 `server.js` 后 `<img src="/avatar.svg?seed=xxx">` 直接出图
+- **`<img>` 直引**：跑起 `serve.js` 后 `<img src="/avatar.svg?seed=xxx">` 直接出图
 
 ## 快速开始
 
@@ -31,13 +31,18 @@ npx serve .
 python -m http.server
 ```
 
-### 方式三：支持 `<img>` 直引（推荐部署）
+### 方式三：自有服务器（推荐：支持 `<img>` 直引）
 
-零依赖 Node 服务器（静态托管 + `/avatar.svg` 动态端点）：
+零依赖 Node 服务器（静态托管 + `/avatar.svg` 动态端点），需要 Node ≥ 18：
 
 ```bash
-node server.js          # 默认端口 8123，PORT 环境变量可改
+git clone https://github.com/MCNeko-Forum/random-cat-avatar.git
+cd random-cat-avatar
+npm start              # 默认端口 8123，PORT 环境变量可改：PORT=80 npm start
 ```
+
+**宝塔面板**：软件商店安装「PM2 管理器」→ 添加项目 → 启动文件选 `serve.js`（PM2 守护进程 + 开机自启）。
+> 注意：Node 项目管理器生成的启动脚本依赖 `/bin/nohup`，若被安全插件拦截（报 `cannot execute` / `Success`），改用 PM2 管理器或重装 coreutils。
 
 然后在任意网页里：
 
@@ -47,23 +52,18 @@ node server.js          # 默认端口 8123，PORT 环境变量可改
 
 端点特性：同 seed 同图可缓存（`Cache-Control: 24h`）、`Access-Control-Allow-Origin: *` 允许跨站引用、seed 经 SHA-256 无注入面、目录穿越已防护。
 
-### 方式四：部署到 Vercel
+### 方式四：部署到 Vercel（一键）
 
-本项目已包含 Vercel Serverless Function 配置。把仓库导入 Vercel 后无需构建命令：
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FMCNeko-Forum%2Frandom-cat-avatar)
 
-1. 登录 [Vercel](https://vercel.com/)，点击 **Add New → Project**。
-2. 导入 `MCNeko-Forum/random-cat-avatar` 仓库。
-3. Framework Preset 选择 **Other**，Build Command 留空，Output Directory 留空。
-4. 点击 **Deploy**。
-
-部署后可使用：
+点上面的按钮 → 授权并导入仓库 → 无需构建命令，一路下一步即可。部署后可用：
 
 ```text
 https://你的项目.vercel.app/
 https://你的项目.vercel.app/avatar.svg?seed=年糕
 ```
 
-`/avatar.svg` 会由 `api/avatar.svg.js` 生成，`vercel.json` 负责把公开路径重写到 Serverless Function。
+`/avatar.svg` 由 `api/avatar.svg.js` 生成，`vercel.json` 负责把公开路径重写到 Serverless Function。之后每次 `git push` 自动重新部署。
 
 ## 用法
 

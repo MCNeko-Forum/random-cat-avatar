@@ -1,0 +1,17 @@
+{
+  "name": "random-cat-avatar",
+  "version": "1.0.0",
+  "description": "随机 SVG 猫咪头像生成器：seed → SHA-256 → 确定性头像，支持 img 直引",
+  "main": "serve.js",
+  "scripts": {
+    "start": "node serve.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MCNeko-Forum/random-cat-avatar.git"
+  }
+}
