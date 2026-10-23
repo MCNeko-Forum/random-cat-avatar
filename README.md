@@ -65,6 +65,25 @@ https://你的项目.vercel.app/avatar.svg?seed=年糕
 
 `/avatar.svg` 由 `api/avatar.svg.js` 生成，`vercel.json` 负责把公开路径重写到 Serverless Function。之后每次 `git push` 自动重新部署。
 
+### 方式五：部署到 Cloudflare Pages
+
+在 Cloudflare Pages 中创建项目 → **连接到 Git** → 选中本仓库 → 构建配置：
+
+| 项 | 值 |
+|---|---|
+| Framework preset | `None` |
+| Build command | 留空 |
+| Build output directory | `/` |
+
+部署后可用：
+
+```text
+https://你的项目.pages.dev/
+https://你的项目.pages.dev/avatar.svg?seed=年糕
+```
+
+`/avatar.svg` 由 `functions/avatar.svg.js` 生成。注意 Cloudflare 的 workerd 运行时**没有 Node 的 `fs`/`vm`**，所以这里用的是另一套垫片（`functions/_window.js` 造 `window` + ESM 直接 import 三件套），与 Vercel 版 `api/` 互不影响，两套可并存。
+
 ## 用法
 
 - **seed 输入**：页面输入任意字符串（中文、emoji 都行），实时生成
@@ -84,6 +103,9 @@ https://你的项目.vercel.app/avatar.svg?seed=年糕
 ├── serve.js          # 零依赖 Node 服务器（本地开发：静态托管 + /avatar.svg）
 ├── api/avatar.svg.js # Vercel Serverless Function（线上 /avatar.svg）
 ├── vercel.json       # Vercel 路由重写：/avatar.svg → /api/avatar.svg
+├── functions/        # Cloudflare Pages Functions（与 api/ 并存，互不影响）
+│   ├── avatar.svg.js #   线上 /avatar.svg（workerd 版）
+│   └── _window.js    #   垫片：造 window（workerd 无 DOM，下划线开头不参与路由）
 └── REQUIREMENTS.md  # 需求文档（部件细节的完整说明）
 ```
 
